@@ -315,7 +315,7 @@ export class ImtaxiService {
    */
   async healthCheck() {
     try {
-      const url = `${Config.imtaxi.url}common/alive-check`;
+      const url = `${Config.imtaxi.url}/common/alive-check`;
       console.log(url);
       const res = await this.apiUtils.get(url, await this.getHeader(true));
       console.log(res);
