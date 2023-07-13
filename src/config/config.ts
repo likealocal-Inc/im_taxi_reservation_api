@@ -1,6 +1,6 @@
 export const Config = {
   imtaxi: {
-    url: 'http://119.28.152.89:19000/v1/',
+    url: 'http://119.28.152.89:19000/v1',
     getHeader: async (accessToken = ''): Promise<any> => {
       return {
         'Accept-Language': 'ko',
