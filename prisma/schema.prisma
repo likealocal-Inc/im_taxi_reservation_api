@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model TokenInfo{
+  id String @default(uuid()) @id
+  createdAt  DateTime   @default(now())
+  updated DateTime @updatedAt
+  
+  accessToken String
+  expiresIn String
+  refreshToken String
+  refreshTokenExpiresIn String
+  isDormant String
+}
+
+model ApiKeys{
+
+  id String @default(uuid()) @id
+  createdAt  DateTime   @default(now())
+  updated DateTime @updatedAt
+
+  key String
+  service String @unique
+  else01 String @default("")
+  else02 String @default("")
+}
+
+model Reservation{
+
+  id String @default(uuid()) @id
+  createdAt  DateTime   @default(now())
+  updated DateTime @updatedAt
+
+  apiKey String
+  orderNo String
+
+  // 예약등록번호
+  registrationNo Int?
+  // 예약 일련번호
+  reservationBoardingHistoryIdx Int? @unique
+  // 예약번호
+  reservationNo Int?
+
+  // 예약승인
+  reservationApprove Int?
+  // 예약승인 일시
+  reservationApproveDate String?
+
+  // 취소여부
+  isCancel Int?
+  // 취소일시
+  cancelDate String?
+
+  else01 String @default("")
+  else02 String @default("")
+}
+
