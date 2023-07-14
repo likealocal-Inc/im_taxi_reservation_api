@@ -16,6 +16,8 @@ import { ReservationCancelDto } from './dto/reservation.cancel.dto';
 import { UsageListDto } from './dto/usage.list.dto';
 import { ReservationCancelReasonResponseDto } from './dto/reservation.cancel.reason.response.dto';
 import { UsageListResponseDto } from './dto/usage.list.response';
+import { CustomException } from 'src/config/exceptions/custom.exception';
+import { ExceptionCodeList } from 'src/config/exceptions/exception.code';
 
 @Injectable()
 export class ImtaxiService {
@@ -28,7 +30,21 @@ export class ImtaxiService {
   }
 
   /**
-   *
+   * 아임택시 호출 에러메세지에서 메세지 뽑아내기
+   * @param error
+   * @returns
+   */
+  getMessageFromIMTaxiAPI(error) {
+    return error.response !== undefined
+      ? error.response.data !== undefined
+        ? error.response.data.error !== undefined
+          ? error.response.data.error
+          : error.response.data
+        : error.response
+      : error;
+  }
+  /**
+   * 헤드 생성
    * @param isAccessTokenInclude
    * @returns
    */
@@ -41,6 +57,11 @@ export class ImtaxiService {
     }
   }
 
+  /**
+   * 토큰 체크
+   * - 토큰에 문제가 있으면 로그인시도하여 재생성
+   * @returns
+   */
   async checkToken(): Promise<TokenInfoEntity> {
     const token: TokenInfoEntity = await this.prisma.tokenInfo.findFirst();
 
@@ -57,15 +78,21 @@ export class ImtaxiService {
 
         return token;
       } catch (error) {
-        if (error.response.data.error.type === 'Precondition Failed') {
-        }
         if (error.response.data.error.type === 'Unauthorized') {
           return await this.login();
+        } else {
+          const msg = this.getMessageFromIMTaxiAPI(error);
+          new CustomException(ExceptionCodeList.IM_TAXI, msg);
         }
       }
     }
   }
 
+  /**
+   * 로그인처리
+   * @param tokenInfoId
+   * @returns
+   */
   async login(tokenInfoId = ''): Promise<TokenInfoEntity> {
     const url = `${Config.imtaxi.url}/account/signin`;
     try {
@@ -85,12 +112,8 @@ export class ImtaxiService {
 
       return tokenInfo;
     } catch (error) {
-      console.log(error);
-      if (error.response.data.error === 'Precondition Failed') {
-      }
-      if (error.response.data.error === 'Unauthorized') {
-        // 토큰오류
-      }
+      const msg = this.getMessageFromIMTaxiAPI(error);
+      new CustomException(ExceptionCodeList.IM_TAXI, msg);
     }
   }
 
@@ -110,7 +133,8 @@ export class ImtaxiService {
 
       return res;
     } catch (error) {
-      console.log(error);
+      const msg = this.getMessageFromIMTaxiAPI(error);
+      new CustomException(ExceptionCodeList.IM_TAXI, msg);
     }
   }
 
@@ -141,7 +165,8 @@ export class ImtaxiService {
 
       return reservation.id;
     } catch (error) {
-      console.log(error.response.data);
+      const msg = this.getMessageFromIMTaxiAPI(error);
+      new CustomException(ExceptionCodeList.IM_TAXI, msg);
     }
   }
 
@@ -156,7 +181,8 @@ export class ImtaxiService {
       console.log(res);
       return res;
     } catch (error) {
-      console.log(error);
+      const msg = this.getMessageFromIMTaxiAPI(error);
+      new CustomException(ExceptionCodeList.IM_TAXI, msg);
     }
   }
 
@@ -169,7 +195,7 @@ export class ImtaxiService {
   }
 
   /**
-   *
+   * 아이디로 예약조회
    */
   async findReservationById(id: string) {
     // 아이디로 예약조회
@@ -177,6 +203,7 @@ export class ImtaxiService {
       where: { id },
     });
   }
+
   /**
    * 예약승인
    * @param reservationApprovalDto
@@ -214,7 +241,8 @@ export class ImtaxiService {
       });
       return reservation.id;
     } catch (error) {
-      console.log(error.response);
+      const msg = this.getMessageFromIMTaxiAPI(error);
+      new CustomException(ExceptionCodeList.IM_TAXI, msg);
     }
   }
 
@@ -241,7 +269,8 @@ export class ImtaxiService {
       const res = await this.apiUtils.get(url, await this.getHeader(true));
       return res;
     } catch (error) {
-      console.log(error);
+      const msg = this.getMessageFromIMTaxiAPI(error);
+      new CustomException(ExceptionCodeList.IM_TAXI, msg);
     }
   }
 
@@ -263,7 +292,7 @@ export class ImtaxiService {
       }
 
       const url = `${Config.imtaxi.url}/reservation/cancel`;
-      const res = await this.apiUtils.post(url, await this.getHeader(true), {
+      await this.apiUtils.post(url, await this.getHeader(true), {
         reservationBoardingHistoryIdx:
           reservation.reservationBoardingHistoryIdx,
         cancelType: reservationCancelDto.cancelType,
@@ -279,10 +308,10 @@ export class ImtaxiService {
           cancelDate: DateUtil.nowString('YYYY-MM-DD hh:mm'),
         },
       });
-      console.log(res);
       return reservation.id;
     } catch (error) {
-      console.log(error.response.data);
+      const msg = this.getMessageFromIMTaxiAPI(error);
+      new CustomException(ExceptionCodeList.IM_TAXI, msg);
     }
   }
 
@@ -302,10 +331,10 @@ export class ImtaxiService {
       }
       const url = `${Config.imtaxi.url}/history/usage/${reservation.reservationBoardingHistoryIdx}`;
       const res = await this.apiUtils.get(url, await this.getHeader(true));
-      console.log(res);
       return res;
     } catch (error) {
-      console.log(error.response.data);
+      const msg = this.getMessageFromIMTaxiAPI(error);
+      new CustomException(ExceptionCodeList.IM_TAXI, msg);
     }
   }
 
@@ -316,12 +345,11 @@ export class ImtaxiService {
   async healthCheck() {
     try {
       const url = `${Config.imtaxi.url}/common/alive-check`;
-      console.log(url);
       const res = await this.apiUtils.get(url, await this.getHeader(true));
-      console.log(res);
       return res;
     } catch (error) {
-      console.log(error);
+      const msg = this.getMessageFromIMTaxiAPI(error);
+      new CustomException(ExceptionCodeList.IM_TAXI, msg);
     }
   }
 }

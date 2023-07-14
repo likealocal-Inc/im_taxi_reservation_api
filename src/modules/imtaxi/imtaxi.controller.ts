@@ -276,7 +276,6 @@ export class ImtaxiController {
     status: '2XX',
   })
   async healthCheck(): Promise<HealthCheckResponseDto> {
-    console.log('111');
     return await this.imtaxiService.healthCheck();
   }
 }

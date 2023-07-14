@@ -41,11 +41,25 @@ export class ApiUtils {
     };
   }
 
+  /**
+   * POST
+   * @param url
+   * @param headers
+   * @param params
+   * @returns
+   */
   async post(url: string, headers = {}, params = {}) {
     const res = await axios.post(url, params, { headers });
     return res.data;
   }
 
+  /**
+   * PUT
+   * @param url
+   * @param headers
+   * @param params
+   * @returns
+   */
   async put(url: string, headers = {}, params = {}) {
     const res = await axios.put(url, params, { headers });
     console.log(res);
