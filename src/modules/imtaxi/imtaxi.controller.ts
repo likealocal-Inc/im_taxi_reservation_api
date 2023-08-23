@@ -21,6 +21,7 @@ import {
 import { UsageListResponseDto } from './dto/usage.list.response';
 import { HealthCheckResponseDto } from './dto/healthcheck.response.dto';
 import { type } from 'os';
+import { ReservationFindlDto } from './dto/reservation.find';
 
 @ApiTags('IM TAXI')
 @AUTH_MUST()
@@ -296,9 +297,14 @@ export class ImtaxiController {
     description: '서버에 사용요청한 서비스 이름',
     required: true,
   })
-  async findById(@Body() body: any): Promise<any> {
+  @ApiBody({ type: ReservationFindlDto })
+  async findById(
+    @Body() reservationFindlDto: ReservationFindlDto,
+  ): Promise<any> {
     try {
-      return await this.imtaxiService.findReservationById(body.id);
+      return await this.imtaxiService.findReservationById(
+        reservationFindlDto.reservationId,
+      );
     } catch (error) {
       console.log(error);
       return { ok: false, data: error };
