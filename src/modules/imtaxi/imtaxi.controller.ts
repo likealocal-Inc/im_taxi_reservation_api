@@ -115,7 +115,7 @@ export class ImtaxiController {
     description: '서버에 사용요청한 서비스 이름',
     required: true,
   })
-  @ApiParam(ReservationApprovalDto)
+  @ApiBody({ type: ReservationApprovalDto })
   @ApiOkResponse({
     description: '택시예약 ID',
     type: String,
@@ -177,7 +177,7 @@ export class ImtaxiController {
     description: '서버에 사용요청한 서비스 이름',
     required: true,
   })
-  @ApiParam(ReservationCancelReasonDto)
+  @ApiBody({ type: ReservationCancelReasonDto })
   @ApiOkResponse({
     description: '취소사유가 가능한 리스트',
     type: ReservationCancelReasonResponseDto,
@@ -210,7 +210,7 @@ export class ImtaxiController {
     description: '서버에 사용요청한 서비스 이름',
     required: true,
   })
-  @ApiParam(ReservationCancelDto)
+  @ApiBody({ type: ReservationCancelDto })
   @ApiOkResponse({
     description: '취소처리한 주문 ID',
     type: String,
@@ -242,7 +242,7 @@ export class ImtaxiController {
     description: '서버에 사용요청한 서비스 이름',
     required: true,
   })
-  @ApiParam(UsageListDto)
+  @ApiBody({ type: UsageListDto })
   @ApiOkResponse({
     description: '이용내역 리스트',
     type: UsageListResponseDto,
