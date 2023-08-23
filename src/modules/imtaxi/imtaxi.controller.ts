@@ -276,4 +276,32 @@ export class ImtaxiController {
   async healthCheck(): Promise<HealthCheckResponseDto> {
     return await this.imtaxiService.healthCheck();
   }
+
+  /**
+   * 헬스체크
+   * @returns
+   */
+  @Post('find.reservation')
+  @ApiOperation({
+    summary: '예약ID로 예약데이터 조회',
+    description: '예약ID로 예약데이터 조회',
+  })
+  @ApiHeader({
+    name: 'api-key',
+    description: '서버에서 제공한 서비스 API KEY',
+    required: true,
+  })
+  @ApiHeader({
+    name: 'service',
+    description: '서버에 사용요청한 서비스 이름',
+    required: true,
+  })
+  async findById(@Body() body: any): Promise<any> {
+    try {
+      return await this.imtaxiService.findReservationById(body.id);
+    } catch (error) {
+      console.log(error);
+      return { ok: false, data: error };
+    }
+  }
 }

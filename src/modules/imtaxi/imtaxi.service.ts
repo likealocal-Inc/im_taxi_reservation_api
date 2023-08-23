@@ -197,7 +197,7 @@ export class ImtaxiService {
   /**
    * 아이디로 예약조회
    */
-  async findReservationById(id: string) {
+  async findReservationById(id: string): Promise<ReservationEntity> {
     // 아이디로 예약조회
     return await this.prisma.reservation.findFirst({
       where: { id },
