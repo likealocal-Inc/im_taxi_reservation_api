@@ -146,7 +146,7 @@ export class ImtaxiService {
   async reservation(
     reservationDto: ReservationDto,
     apiKey: string,
-  ): Promise<string> {
+  ): Promise<any> {
     const url = `${Config.imtaxi.url}/reservation`;
     try {
       const res = await this.apiUtils.post(
@@ -163,7 +163,7 @@ export class ImtaxiService {
           },
         });
 
-      return reservation.id;
+      return { id: reservation.id, registrationNo: reservation.registrationNo };
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
       new CustomException(ExceptionCodeList.IM_TAXI, msg);

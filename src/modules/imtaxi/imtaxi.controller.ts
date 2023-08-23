@@ -11,6 +11,7 @@ import { ReservationCancelReasonResponseDto } from './dto/reservation.cancel.rea
 import { ReservationCancelDto } from './dto/reservation.cancel.dto';
 import { UsageListDto } from './dto/usage.list.dto';
 import {
+  ApiBody,
   ApiHeader,
   ApiOkResponse,
   ApiOperation,
@@ -19,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { UsageListResponseDto } from './dto/usage.list.response';
 import { HealthCheckResponseDto } from './dto/healthcheck.response.dto';
+import { type } from 'os';
 
 @ApiTags('IM TAXI')
 @AUTH_MUST()
@@ -46,7 +48,7 @@ export class ImtaxiController {
     description: '서버에 사용요청한 서비스 이름',
     required: true,
   })
-  @ApiParam(FareInfoDto)
+  @ApiBody({ type: FareInfoDto })
   @ApiOkResponse({
     description: '요금조회결과 데이터',
     type: ReservationfareInfo,
@@ -55,6 +57,7 @@ export class ImtaxiController {
   async getFareInfo(
     @Body() fareInfoDto: FareInfoDto,
   ): Promise<ReservationfareInfo> {
+    console.log(fareInfoDto);
     return await this.imtaxiService.getFareInfo(fareInfoDto);
   }
 
@@ -78,7 +81,7 @@ export class ImtaxiController {
     description: '서버에 사용요청한 서비스 이름',
     required: true,
   })
-  @ApiParam(ReservationDto)
+  @ApiBody({ type: ReservationDto })
   @ApiOkResponse({
     description: '택시예약 ID',
     type: String,
@@ -87,7 +90,7 @@ export class ImtaxiController {
   async reservation(
     @Req() req: any,
     @Body() reservationDto: ReservationDto,
-  ): Promise<string> {
+  ): Promise<any> {
     return await this.imtaxiService.reservation(reservationDto, req.apiKey);
   }
 
@@ -269,11 +272,6 @@ export class ImtaxiController {
     name: 'service',
     description: '서버에 사용요청한 서비스 이름',
     required: true,
-  })
-  @ApiOkResponse({
-    description: '이용내역 리스트',
-    type: HealthCheckResponseDto,
-    status: '2XX',
   })
   async healthCheck(): Promise<HealthCheckResponseDto> {
     return await this.imtaxiService.healthCheck();
