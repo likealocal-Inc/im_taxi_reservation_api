@@ -230,9 +230,6 @@ export class ImtaxiService {
         orderNo: reservation.orderNo,
       });
 
-      console.log('-------');
-      console.log(res);
-
       // 승인결과 DB에 업데이트
       reservation = await this.prisma.reservation.update({
         where: { id: reservation.id },
@@ -242,7 +239,6 @@ export class ImtaxiService {
           reservationApproveDate: DateUtil.nowString('YYYY-MM-DD hh:mm'),
         },
       });
-      console.log(reservation);
       return {
         id: reservation.id,
         registrationNo: reservation.registrationNo,
@@ -291,7 +287,7 @@ export class ImtaxiService {
    */
   async reservationCancel(
     reservationCancelDto: ReservationCancelDto,
-  ): Promise<string> {
+  ): Promise<any> {
     try {
       let reservation: ReservationEntity = await this.findReservationById(
         reservationCancelDto.reservationId,
@@ -318,7 +314,7 @@ export class ImtaxiService {
           cancelDate: DateUtil.nowString('YYYY-MM-DD hh:mm'),
         },
       });
-      return reservation.id;
+      return { id: reservation.id, cancelDate: reservation.cancelDate };
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
       new CustomException(ExceptionCodeList.IM_TAXI, msg);
