@@ -211,7 +211,7 @@ export class ImtaxiService {
    */
   async reservationApproval(
     reservationApprovalDto: ReservationApprovalDto,
-  ): Promise<string> {
+  ): Promise<any> {
     const url = `${Config.imtaxi.url}/reservation`;
     try {
       // 아이디로 예약조회
@@ -230,6 +230,9 @@ export class ImtaxiService {
         orderNo: reservation.orderNo,
       });
 
+      console.log('-------');
+      console.log(res);
+
       // 승인결과 DB에 업데이트
       reservation = await this.prisma.reservation.update({
         where: { id: reservation.id },
@@ -239,7 +242,14 @@ export class ImtaxiService {
           reservationApproveDate: DateUtil.nowString('YYYY-MM-DD hh:mm'),
         },
       });
-      return reservation.id;
+      console.log(reservation);
+      return {
+        id: reservation.id,
+        registrationNo: reservation.registrationNo,
+        reservationBoardingHistoryIdx:
+          reservation.reservationBoardingHistoryIdx,
+        reservationApproveDate: reservation.reservationApproveDate,
+      };
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
       new CustomException(ExceptionCodeList.IM_TAXI, msg);
