@@ -163,7 +163,7 @@ export class ImtaxiService {
           },
         });
 
-      return { id: reservation.id, registrationNo: reservation.registrationNo };
+      return { id: reservation.id };
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
       new CustomException(ExceptionCodeList.IM_TAXI, msg);
@@ -204,6 +204,13 @@ export class ImtaxiService {
     });
   }
 
+  async findReservationByReservationNo(no: number): Promise<ReservationEntity> {
+    // 아이디로 예약조회
+    return await this.prisma.reservation.findFirst({
+      where: { registrationNo: no },
+    });
+  }
+
   /**
    * 예약승인
    * @param reservationApprovalDto
@@ -216,8 +223,10 @@ export class ImtaxiService {
     try {
       // 아이디로 예약조회
       let reservation = await this.findReservationById(
-        reservationApprovalDto.registrationId,
+        reservationApprovalDto.id,
       );
+
+      console.log(reservation);
 
       // 조회값이 없으면 잘못된 호출
       if (reservation === undefined || reservation === null) {
@@ -226,7 +235,7 @@ export class ImtaxiService {
 
       // 예약승인처리
       const res = await this.apiUtils.put(url, await this.getHeader(true), {
-        ...reservationApprovalDto,
+        registrationNo: reservation.registrationNo,
         orderNo: reservation.orderNo,
       });
 
@@ -241,12 +250,10 @@ export class ImtaxiService {
       });
       return {
         id: reservation.id,
-        registrationNo: reservation.registrationNo,
-        reservationBoardingHistoryIdx:
-          reservation.reservationBoardingHistoryIdx,
         reservationApproveDate: reservation.reservationApproveDate,
       };
     } catch (error) {
+      console.log(error);
       const msg = this.getMessageFromIMTaxiAPI(error);
       new CustomException(ExceptionCodeList.IM_TAXI, msg);
     }
@@ -263,7 +270,7 @@ export class ImtaxiService {
     try {
       // 아이디로 예약조회
       const reservation: ReservationEntity = await this.findReservationById(
-        reservationApprovalDto.reservationId,
+        reservationApprovalDto.id,
       );
 
       // 조회값이 없으면 잘못된 호출
@@ -273,8 +280,11 @@ export class ImtaxiService {
 
       const url = `${Config.imtaxi.url}/reservation/cancel/reason/${reservation.reservationBoardingHistoryIdx}`;
       const res = await this.apiUtils.get(url, await this.getHeader(true));
+      console.log('#33');
+      console.log(res);
       return res;
     } catch (error) {
+      console.log(error);
       const msg = this.getMessageFromIMTaxiAPI(error);
       new CustomException(ExceptionCodeList.IM_TAXI, msg);
     }
@@ -290,7 +300,7 @@ export class ImtaxiService {
   ): Promise<any> {
     try {
       let reservation: ReservationEntity = await this.findReservationById(
-        reservationCancelDto.reservationId,
+        reservationCancelDto.id,
       );
       // 조회값이 없으면 잘못된 호출
       if (reservation === undefined || reservation === null) {
@@ -307,7 +317,7 @@ export class ImtaxiService {
 
       reservation = await this.prisma.reservation.update({
         where: {
-          id: reservationCancelDto.reservationId,
+          id: reservationCancelDto.id,
         },
         data: {
           isCancel: 1,
@@ -329,7 +339,7 @@ export class ImtaxiService {
   async usageList(usageListDto: UsageListDto): Promise<UsageListResponseDto[]> {
     try {
       const reservation: ReservationEntity = await this.findReservationById(
-        usageListDto.reservationId,
+        usageListDto.id,
       );
       // 조회값이 없으면 잘못된 호출
       if (reservation === undefined || reservation === null) {

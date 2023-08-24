@@ -6,7 +6,7 @@ export class ReservationCancelDto {
     description: '예약 ID',
   })
   @IsString()
-  reservationId: string;
+  id: string;
 
   @ApiProperty({
     description: '취소타입: (1: 수수료 미 부과 취소, 2: 수수료 부과 취소)',

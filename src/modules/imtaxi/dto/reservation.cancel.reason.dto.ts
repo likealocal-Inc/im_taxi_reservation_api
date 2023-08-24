@@ -6,5 +6,5 @@ export class ReservationCancelReasonDto {
     description: '예약 ID',
   })
   @IsString()
-  reservationId: string;
+  id: string;
 }

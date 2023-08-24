@@ -47,8 +47,9 @@ model Reservation{
   registrationNo Int?
   // 예약 일련번호
   reservationBoardingHistoryIdx Int? @unique
-  // 예약번호
-  reservationNo Int?
+  
+  // // 예약번호
+  // reservationNo Int?
 
   // 예약승인
   reservationApprove Int?

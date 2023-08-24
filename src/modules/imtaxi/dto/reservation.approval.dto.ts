@@ -6,5 +6,5 @@ export class ReservationApprovalDto {
     description: '예약 ID',
   })
   @IsInt()
-  registrationId: string;
+  id: string;
 }

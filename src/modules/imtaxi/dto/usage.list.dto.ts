@@ -6,5 +6,5 @@ export class UsageListDto {
     description: '예약 ID',
   })
   @IsString()
-  reservationId: string;
+  id: string;
 }

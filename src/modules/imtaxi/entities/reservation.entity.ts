@@ -48,11 +48,11 @@ export class ReservationEntity implements Reservation {
   @IsInt()
   reservationBoardingHistoryIdx: number;
 
-  @ApiProperty({
-    description: '예약 번호',
-  })
-  @IsInt()
-  reservationNo: number;
+  // @ApiProperty({
+  //   description: '예약 번호',
+  // })
+  // @IsInt()
+  // reservationNo: number;
 
   @ApiProperty({
     enum: [0, 1],
