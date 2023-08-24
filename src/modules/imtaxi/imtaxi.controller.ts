@@ -56,7 +56,6 @@ export class ImtaxiController {
   async getFareInfo(
     @Body() fareInfoDto: FareInfoDto,
   ): Promise<ReservationfareInfo> {
-    console.log(fareInfoDto);
     return await this.imtaxiService.getFareInfo(fareInfoDto);
   }
 

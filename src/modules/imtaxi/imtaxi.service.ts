@@ -178,7 +178,6 @@ export class ImtaxiService {
     try {
       const url = `${Config.imtaxi.url}/reservaiton/history`;
       const res = await this.apiUtils.get(url, await this.getHeader(true));
-      console.log(res);
       return res;
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
@@ -225,8 +224,6 @@ export class ImtaxiService {
       let reservation = await this.findReservationById(
         reservationApprovalDto.id,
       );
-
-      console.log(reservation);
 
       // 조회값이 없으면 잘못된 호출
       if (reservation === undefined || reservation === null) {
@@ -280,8 +277,6 @@ export class ImtaxiService {
 
       const url = `${Config.imtaxi.url}/reservation/cancel/reason/${reservation.reservationBoardingHistoryIdx}`;
       const res = await this.apiUtils.get(url, await this.getHeader(true));
-      console.log('#33');
-      console.log(res);
       return res;
     } catch (error) {
       console.log(error);

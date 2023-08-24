@@ -9,7 +9,6 @@ export class ApiKeysService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createApiKeyDto: CreateApiKeyDto) {
-    console.log(createApiKeyDto);
     return await this.prisma.apiKeys.create({
       data: {
         key: await ElseUtils.getRandomNum(),

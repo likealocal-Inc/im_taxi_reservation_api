@@ -62,7 +62,6 @@ export class ApiUtils {
    */
   async put(url: string, headers = {}, params = {}) {
     const res = await axios.put(url, params, { headers });
-    console.log(res);
     return res.data;
   }
 
