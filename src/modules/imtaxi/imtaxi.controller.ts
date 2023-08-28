@@ -129,36 +129,36 @@ export class ImtaxiController {
    * @param reservationDto
    * @returns
    */
-  // @Post('reservation.list')
-  // @ApiOperation({
-  //   summary: '택시예약내역',
-  //   description: '택시예약내역',
-  // })
-  // @ApiHeader({
-  //   name: 'api-key',
-  //   description: '서버에서 제공한 서비스 API KEY',
-  //   required: true,
-  // })
-  // @ApiHeader({
-  //   name: 'service',
-  //   description: '서버에 사용요청한 서비스 이름',
-  //   required: true,
-  // })
-  // @ApiOkResponse({
-  //   description: '택시예약 ID',
-  //   type: ReservationEntity,
-  //   isArray: true,
-  //   status: '2XX',
-  // })
-  // async reservationList(): Promise<ReservationEntity[]> {
-  //   return await this.imtaxiService.reservationListFromIMServer();
-  // }
+  @Post('reservation.list')
+  @ApiOperation({
+    summary: '택시예약내역',
+    description: '택시예약내역',
+  })
+  @ApiHeader({
+    name: 'api-key',
+    description: '서버에서 제공한 서비스 API KEY',
+    required: true,
+  })
+  @ApiHeader({
+    name: 'service',
+    description: '서버에 사용요청한 서비스 이름',
+    required: true,
+  })
+  @ApiOkResponse({
+    description: '택시예약 ID',
+    type: ReservationEntity,
+    isArray: true,
+    status: '2XX',
+  })
+  async reservationList(): Promise<ReservationEntity[]> {
+    return await this.imtaxiService.reservationListFromIMServer();
+  }
 
-  // /**
-  //  * 예약취소이유조회
-  //  * @param reservationDto
-  //  * @returns
-  //  */
+  /**
+   * 예약취소이유조회
+   * @param reservationDto
+   * @returns
+   */
   @Post('reservation.cancel.reason')
   @ApiOperation({
     summary: '택시예약취소 사유 조회',

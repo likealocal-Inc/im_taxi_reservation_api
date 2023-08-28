@@ -178,7 +178,23 @@ export class ImtaxiService {
     try {
       const url = `${Config.imtaxi.url}/reservaiton/history`;
       const res = await this.apiUtils.get(url, await this.getHeader(true));
-      return res;
+      const data = [];
+      for (let index = 0; index < res.length; index++) {
+        const element = res[index];
+        const temp = await this.prisma.reservation.findFirst({
+          where: {
+            reservationBoardingHistoryIdx:
+              element.reservationBoardingHistoryIdx,
+          },
+        });
+        let d = { ...element, id: 'NONE_IN_DB' };
+        if (temp) {
+          d = { ...element, id: temp.id };
+        }
+        data.push(d);
+      }
+      console.log(data);
+      return data;
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
       throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
