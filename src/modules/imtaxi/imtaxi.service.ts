@@ -113,7 +113,7 @@ export class ImtaxiService {
       return tokenInfo;
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
-      new CustomException(ExceptionCodeList.IM_TAXI, msg);
+      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
     }
   }
 
@@ -134,7 +134,7 @@ export class ImtaxiService {
       return res;
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
-      new CustomException(ExceptionCodeList.IM_TAXI, msg);
+      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
     }
   }
 
@@ -166,7 +166,7 @@ export class ImtaxiService {
       return { id: reservation.id };
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
-      new CustomException(ExceptionCodeList.IM_TAXI, msg);
+      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
     }
   }
 
@@ -181,7 +181,7 @@ export class ImtaxiService {
       return res;
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
-      new CustomException(ExceptionCodeList.IM_TAXI, msg);
+      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
     }
   }
 
@@ -250,9 +250,8 @@ export class ImtaxiService {
         reservationApproveDate: reservation.reservationApproveDate,
       };
     } catch (error) {
-      console.log(error);
       const msg = this.getMessageFromIMTaxiAPI(error);
-      new CustomException(ExceptionCodeList.IM_TAXI, msg);
+      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
     }
   }
 
@@ -279,9 +278,8 @@ export class ImtaxiService {
       const res = await this.apiUtils.get(url, await this.getHeader(true));
       return res;
     } catch (error) {
-      console.log(error);
       const msg = this.getMessageFromIMTaxiAPI(error);
-      new CustomException(ExceptionCodeList.IM_TAXI, msg);
+      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
     }
   }
 
@@ -322,7 +320,7 @@ export class ImtaxiService {
       return { id: reservation.id, cancelDate: reservation.cancelDate };
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
-      new CustomException(ExceptionCodeList.IM_TAXI, msg);
+      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
     }
   }
 
@@ -336,6 +334,7 @@ export class ImtaxiService {
       const reservation: ReservationEntity = await this.findReservationById(
         usageListDto.id,
       );
+
       // 조회값이 없으면 잘못된 호출
       if (reservation === undefined || reservation === null) {
         return;
@@ -345,7 +344,7 @@ export class ImtaxiService {
       return res;
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
-      new CustomException(ExceptionCodeList.IM_TAXI, msg);
+      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
     }
   }
 
@@ -360,7 +359,7 @@ export class ImtaxiService {
       return res;
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
-      new CustomException(ExceptionCodeList.IM_TAXI, msg);
+      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
     }
   }
 }
