@@ -71,13 +71,15 @@ export class ImtaxiService {
     } else {
       const url = `${Config.imtaxi.url}/auth/token`;
       try {
-        await this.apiUtils.get(
+        const res = await this.apiUtils.get(
           url,
           await Config.imtaxi.getHeader(token.accessToken),
         );
+        console.log(res, '1');
 
         return token;
       } catch (error) {
+        console.log(error.response.data);
         if (error.response.data.error.type === 'Unauthorized') {
           return await this.login();
         } else {
@@ -95,11 +97,12 @@ export class ImtaxiService {
    */
   async login(tokenInfoId = ''): Promise<TokenInfoEntity> {
     const url = `${Config.imtaxi.url}/account/signin`;
-    try {
-      const res = await this.apiUtils.post(url, await this.getHeader(), {
-        phoneNumber: '821065412494',
-      });
+    // const res = await this.callPost(url, { phoneNumber: '821065412494' });
 
+    const res = await this.apiUtils.post(url, await this.getHeader(), {
+      phoneNumber: '821065412494',
+    });
+    try {
       let tokenInfo: TokenInfoEntity;
       if (tokenInfoId === '') {
         tokenInfo = await this.prisma.tokenInfo.create({ data: res });
@@ -112,8 +115,7 @@ export class ImtaxiService {
 
       return tokenInfo;
     } catch (error) {
-      const msg = this.getMessageFromIMTaxiAPI(error);
-      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
+      throw new CustomException(ExceptionCodeList.DB_CALL, error);
     }
   }
 
@@ -125,17 +127,20 @@ export class ImtaxiService {
   async getFareInfo(fareInfoDto: FareInfoDto): Promise<ReservationfareInfo> {
     const params = ElseUtils.toQueryString(fareInfoDto);
     const url = `${Config.imtaxi.url}/reservation/fareInfo?${params}`;
-    try {
-      const res: ReservationfareInfo = await this.apiUtils.get(
-        url,
-        await this.getHeader(true),
-      );
+    const res = await this.callGet(url);
+    return res;
 
-      return res;
-    } catch (error) {
-      const msg = this.getMessageFromIMTaxiAPI(error);
-      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
-    }
+    // try {
+    //   const res: ReservationfareInfo = await this.apiUtils.get(
+    //     url,
+    //     await this.getHeader(true),
+    //   );
+
+    //   return res;
+    // } catch (error) {
+    //   const msg = this.getMessageFromIMTaxiAPI(error);
+    //   throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
+    // }
   }
 
   /**
@@ -148,12 +153,14 @@ export class ImtaxiService {
     apiKey: string,
   ): Promise<any> {
     const url = `${Config.imtaxi.url}/reservation`;
+    const res = await this.callPost(url, reservationDto);
+
     try {
-      const res = await this.apiUtils.post(
-        url,
-        await this.getHeader(true),
-        reservationDto,
-      );
+      // const res = await this.apiUtils.post(
+      //   url,
+      //   await this.getHeader(true),
+      //   reservationDto,
+      // );
       const reservation: ReservationEntity =
         await this.prisma.reservation.create({
           data: {
@@ -165,8 +172,7 @@ export class ImtaxiService {
 
       return { id: reservation.id };
     } catch (error) {
-      const msg = this.getMessageFromIMTaxiAPI(error);
-      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
+      throw new CustomException(ExceptionCodeList.DB_CALL, error);
     }
   }
 
@@ -175,10 +181,10 @@ export class ImtaxiService {
    * @returns
    */
   async reservationListFromIMServer() {
+    const url = `${Config.imtaxi.url}/reservaiton/history`;
+    const res = await this.callGet(url); // await this.apiUtils.get(url, await this.getHeader(true));
+    const data = [];
     try {
-      const url = `${Config.imtaxi.url}/reservaiton/history`;
-      const res = await this.apiUtils.get(url, await this.getHeader(true));
-      const data = [];
       for (let index = 0; index < res.length; index++) {
         const element = res[index];
         const temp = await this.prisma.reservation.findFirst({
@@ -193,11 +199,9 @@ export class ImtaxiService {
         }
         data.push(d);
       }
-      console.log(data);
       return data;
     } catch (error) {
-      const msg = this.getMessageFromIMTaxiAPI(error);
-      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
+      throw new CustomException(ExceptionCodeList.DB_CALL, error);
     }
   }
 
@@ -234,24 +238,27 @@ export class ImtaxiService {
   async reservationApproval(
     reservationApprovalDto: ReservationApprovalDto,
   ): Promise<any> {
-    const url = `${Config.imtaxi.url}/reservation`;
+    let reservation;
     try {
       // 아이디로 예약조회
-      let reservation = await this.findReservationById(
-        reservationApprovalDto.id,
-      );
+      reservation = await this.findReservationById(reservationApprovalDto.id);
 
       // 조회값이 없으면 잘못된 호출
       if (reservation === undefined || reservation === null) {
         return;
       }
+    } catch (error) {
+      throw new CustomException(ExceptionCodeList.DB_CALL, error);
+    }
 
-      // 예약승인처리
-      const res = await this.apiUtils.put(url, await this.getHeader(true), {
-        registrationNo: reservation.registrationNo,
-        orderNo: reservation.orderNo,
-      });
+    const url = `${Config.imtaxi.url}/reservation`;
+    // 예약승인처리
+    const res = await this.callPut(url, {
+      registrationNo: reservation.registrationNo,
+      orderNo: reservation.orderNo,
+    });
 
+    try {
       // 승인결과 DB에 업데이트
       reservation = await this.prisma.reservation.update({
         where: { id: reservation.id },
@@ -266,8 +273,7 @@ export class ImtaxiService {
         reservationApproveDate: reservation.reservationApproveDate,
       };
     } catch (error) {
-      const msg = this.getMessageFromIMTaxiAPI(error);
-      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
+      throw new CustomException(ExceptionCodeList.DB_CALL, error);
     }
   }
 
@@ -279,24 +285,23 @@ export class ImtaxiService {
   async reservationCancelReason(
     reservationApprovalDto: ReservationCancelReasonDto,
   ): Promise<ReservationCancelReasonResponseDto[]> {
+    let reservation: ReservationEntity;
     try {
       // 아이디로 예약조회
-      const reservation: ReservationEntity = await this.findReservationById(
-        reservationApprovalDto.id,
-      );
+      reservation = await this.findReservationById(reservationApprovalDto.id);
 
       // 조회값이 없으면 잘못된 호출
       if (reservation === undefined || reservation === null) {
         return;
       }
-
-      const url = `${Config.imtaxi.url}/reservation/cancel/reason/${reservation.reservationBoardingHistoryIdx}`;
-      const res = await this.apiUtils.get(url, await this.getHeader(true));
-      return res;
     } catch (error) {
-      const msg = this.getMessageFromIMTaxiAPI(error);
-      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
+      throw new CustomException(ExceptionCodeList.DB_CALL, error);
     }
+
+    const url = `${Config.imtaxi.url}/reservation/cancel/reason/${reservation.reservationBoardingHistoryIdx}`;
+    const res = await this.callGet(url);
+    // const res = await this.apiUtils.get(url, await this.getHeader(true));
+    return res;
   }
 
   /**
@@ -307,23 +312,38 @@ export class ImtaxiService {
   async reservationCancel(
     reservationCancelDto: ReservationCancelDto,
   ): Promise<any> {
+    let reservation: ReservationEntity;
     try {
-      let reservation: ReservationEntity = await this.findReservationById(
-        reservationCancelDto.id,
-      );
+      reservation = await this.findReservationById(reservationCancelDto.id);
       // 조회값이 없으면 잘못된 호출
       if (reservation === undefined || reservation === null) {
         return;
       }
+    } catch (error) {
+      throw new CustomException(ExceptionCodeList.DB_CALL, error);
+    }
 
-      const url = `${Config.imtaxi.url}/reservation/cancel`;
-      await this.apiUtils.post(url, await this.getHeader(true), {
-        reservationBoardingHistoryIdx:
-          reservation.reservationBoardingHistoryIdx,
-        cancelType: reservationCancelDto.cancelType,
-        reasonIdx: reservationCancelDto.reasonIdx,
-      });
+    // try {
+    //   const url = `${Config.imtaxi.url}/reservation/cancel`;
+    //   await this.apiUtils.post(url, await this.getHeader(true), {
+    //     reservationBoardingHistoryIdx:
+    //       reservation.reservationBoardingHistoryIdx,
+    //     cancelType: reservationCancelDto.cancelType,
+    //     reasonIdx: reservationCancelDto.reasonIdx,
+    //   });
+    // } catch (error) {
+    //   const msg = this.getMessageFromIMTaxiAPI(error);
+    //   throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
+    // }
 
+    const url = `${Config.imtaxi.url}/reservation/cancel`;
+    await this.callPost(url, {
+      reservationBoardingHistoryIdx: reservation.reservationBoardingHistoryIdx,
+      cancelType: reservationCancelDto.cancelType,
+      reasonIdx: reservationCancelDto.reasonIdx,
+    });
+
+    try {
       reservation = await this.prisma.reservation.update({
         where: {
           id: reservationCancelDto.id,
@@ -335,8 +355,7 @@ export class ImtaxiService {
       });
       return { id: reservation.id, cancelDate: reservation.cancelDate };
     } catch (error) {
-      const msg = this.getMessageFromIMTaxiAPI(error);
-      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
+      throw new CustomException(ExceptionCodeList.DB_CALL, error);
     }
   }
 
@@ -346,16 +365,51 @@ export class ImtaxiService {
    * @returns
    */
   async usageList(usageListDto: UsageListDto): Promise<UsageListResponseDto[]> {
+    let reservation: ReservationEntity;
     try {
-      const reservation: ReservationEntity = await this.findReservationById(
-        usageListDto.id,
-      );
+      reservation = await this.findReservationById(usageListDto.id);
 
       // 조회값이 없으면 잘못된 호출
       if (reservation === undefined || reservation === null) {
         return;
       }
-      const url = `${Config.imtaxi.url}/history/usage/${reservation.reservationBoardingHistoryIdx}`;
+    } catch (error) {
+      throw new CustomException(ExceptionCodeList.DB_CALL, error);
+    }
+
+    const url = `${Config.imtaxi.url}/history/usage/${reservation.reservationBoardingHistoryIdx}`;
+    return await this.callGet(url);
+  }
+
+  /**
+   * 헬스체크
+   * @returns
+   */
+  async healthCheck() {
+    const url = `${Config.imtaxi.url}/common/alive-check`;
+    return await this.callGet(url);
+  }
+
+  /**
+   *
+   * @returns
+   */
+  async getConfig() {
+    const url = `${Config.imtaxi.url}/common/config`;
+    return await this.callGet(url);
+  }
+
+  /**
+   *
+   * @returns
+   */
+  async getCounryCode() {
+    const url = `${Config.imtaxi.url}/common/country-calling-code`;
+    return await this.callGet(url);
+  }
+
+  async callGet(url) {
+    try {
       const res = await this.apiUtils.get(url, await this.getHeader(true));
       return res;
     } catch (error) {
@@ -364,15 +418,19 @@ export class ImtaxiService {
     }
   }
 
-  /**
-   * 헬스체크
-   * @returns
-   */
-  async healthCheck() {
+  async callPost(url, body) {
     try {
-      const url = `${Config.imtaxi.url}/common/alive-check`;
-      const res = await this.apiUtils.get(url, await this.getHeader(true));
-      return res;
+      return await this.apiUtils.post(url, await this.getHeader(true), body);
+    } catch (error) {
+      const msg = this.getMessageFromIMTaxiAPI(error);
+      console.log(msg);
+      throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));
+    }
+  }
+
+  async callPut(url, body) {
+    try {
+      return await this.apiUtils.put(url, await this.getHeader(true), body);
     } catch (error) {
       const msg = this.getMessageFromIMTaxiAPI(error);
       throw new CustomException(ExceptionCodeList.IM_TAXI, JSON.stringify(msg));

@@ -307,4 +307,23 @@ export class ImtaxiController {
       return { ok: false, data: error };
     }
   }
+
+  @Post('config')
+  @ApiOperation({
+    summary: '상태값 세팅 정보 조회',
+    description: '상태값 세팅 정보 조회',
+  })
+  @ApiHeader({
+    name: 'api-key',
+    description: '서버에서 제공한 서비스 API KEY',
+    required: true,
+  })
+  @ApiHeader({
+    name: 'service',
+    description: '서버에 사용요청한 서비스 이름',
+    required: true,
+  })
+  async config(): Promise<HealthCheckResponseDto> {
+    return await this.imtaxiService.getConfig();
+  }
 }

@@ -18,4 +18,9 @@ export const ExceptionCodeList = {
     '아임택시 API 호출 오류',
     HttpStatus.BAD_REQUEST,
   ),
+  DB_CALL: new ExceptionCode(
+    'IM_TAXI.DB_CALL',
+    'DB 호출 오류',
+    HttpStatus.BAD_REQUEST,
+  ),
 };
